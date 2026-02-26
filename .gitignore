@@ -10,3 +10,15 @@ dist/
 *.egg-info/
 .pytest_cache/
 .coverage
+
+# knowns (ignore all except docs)
+.knowns/*
+!.knowns/docs/
+!.knowns/docs/**
+
+# Claude Code & AI agent files
+.claude/
+.agent/
+.mcp.json
+AGENTS.md
+GEMINI.md
