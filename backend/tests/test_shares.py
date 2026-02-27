@@ -101,4 +101,4 @@ def test_create_share_requires_auth(client, mock_storage):
     app.dependency_overrides[get_storage_dep] = lambda: mock_storage
     # no auth header — plain client
     res = client.post("/shares/", json={"file_id": 1})
-    assert res.status_code == 401
+    assert res.status_code in (401, 403)

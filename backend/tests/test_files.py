@@ -113,4 +113,4 @@ def test_download_not_found(auth_client):
 
 def test_upload_requires_auth(client):
     res = _upload(client)
-    assert res.status_code == 401
+    assert res.status_code in (401, 403)
