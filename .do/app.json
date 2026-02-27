@@ -1,0 +1,97 @@
+{
+  "spec": {
+    "name": "filesharing-systems",
+    "region": "sgp",
+    "services": [
+      {
+        "name": "backend",
+        "github": {
+          "repo": "ducanhnguyen223/filesharing-systems",
+          "branch": "main",
+          "deploy_on_push": true
+        },
+        "source_dir": "backend",
+        "dockerfile_path": "Dockerfile",
+        "instance_size_slug": "basic-xxs",
+        "instance_count": 1,
+        "http_port": 8000,
+        "routes": [
+          {
+            "path": "/api",
+            "preserve_path_prefix": true
+          }
+        ],
+        "envs": [
+          {
+            "key": "SECRET_KEY",
+            "value": "",
+            "type": "SECRET"
+          },
+          {
+            "key": "SPACES_KEY",
+            "value": "",
+            "type": "SECRET"
+          },
+          {
+            "key": "SPACES_SECRET",
+            "value": "",
+            "type": "SECRET"
+          },
+          {
+            "key": "SPACES_BUCKET",
+            "value": "filesharing",
+            "type": "GENERAL"
+          },
+          {
+            "key": "SPACES_REGION",
+            "value": "sgp1",
+            "type": "GENERAL"
+          },
+          {
+            "key": "SPACES_ENDPOINT",
+            "value": "https://sgp1.digitaloceanspaces.com",
+            "type": "GENERAL"
+          },
+          {
+            "key": "DATABASE_URL",
+            "value": "${db.DATABASE_URL}",
+            "type": "GENERAL"
+          }
+        ],
+        "health_check": {
+          "http_path": "/health",
+          "initial_delay_seconds": 20,
+          "period_seconds": 10
+        }
+      },
+      {
+        "name": "frontend",
+        "github": {
+          "repo": "ducanhnguyen223/filesharing-systems",
+          "branch": "main",
+          "deploy_on_push": true
+        },
+        "source_dir": "frontend",
+        "dockerfile_path": "Dockerfile",
+        "instance_size_slug": "basic-xxs",
+        "instance_count": 1,
+        "http_port": 80,
+        "routes": [
+          {
+            "path": "/"
+          }
+        ]
+      }
+    ],
+    "databases": [
+      {
+        "name": "db",
+        "engine": "PG",
+        "version": "15",
+        "size": "db-s-dev-database",
+        "num_nodes": 1,
+        "production": false
+      }
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+node_modules
+dist
+.env
+.git
+.github
+.knowns
+.agent
+.claude
+.idea
+.vscode
+*.log
