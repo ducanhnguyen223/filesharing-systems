@@ -83,7 +83,7 @@
         </div>
 
         <!-- Files Section (Clean List within cells) -->
-        <div v-for="file in files" :key="file.id" class="bento-cell file-cell clickable">
+        <div v-for="file in files" :key="file.id" class="bento-cell file-cell clickable" @click="downloadFile(file.id, file.filename)">
           <div class="file-tactile-icon icon-tactile">
              {{ getFileIcon(file.mimetype) }}
           </div>
@@ -135,19 +135,10 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { filesApi, sharesApi } from '@/api'
 
 const auth = useAuthStore()
 const router = useRouter()
-
-// ============ MOCK DATA ============
-const MOCK_FILES = [
-  { id: 1, filename: 'Onboarding-Guide.pdf', size: 2.4 * 1024 ** 2, mimetype: 'application/pdf', created_at: new Date(Date.now() - 3600000).toISOString() },
-  { id: 2, filename: 'Product-Roadmap.docx', size: 5.1 * 1024 ** 2, mimetype: 'image/jpeg', created_at: new Date(Date.now() - 86400000).toISOString() },
-  { id: 3, filename: 'design-specs.fig', size: 18.7 * 1024 ** 2, mimetype: 'application/vnd.figma', created_at: new Date(Date.now() - 172800000).toISOString() },
-  { id: 4, filename: 'budget-2026.xlsx', size: 340 * 1024, mimetype: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', created_at: new Date(Date.now() - 259200000).toISOString() },
-  { id: 5, filename: 'source-code.zip', size: 45.2 * 1024 ** 2, mimetype: 'application/zip', created_at: new Date(Date.now() - 604800000).toISOString() },
-  { id: 6, filename: 'meeting-notes.md', size: 12 * 1024, mimetype: 'text/markdown', created_at: new Date(Date.now() - 1209600000).toISOString() },
-]
 
 const files = ref([])
 const loading = ref(true)
@@ -156,57 +147,62 @@ const uploadError = ref('')
 const fileInput = ref(null)
 const copied = ref(false)
 const shareModal = ref({ show: false, url: '' })
-let nextId = 100
 
 onMounted(async () => {
   if (auth.isLoggedIn) await auth.fetchUser()
-  setTimeout(() => {
-    files.value = [...MOCK_FILES]
+  try {
+    const res = await filesApi.list()
+    files.value = res.data.files
+  } catch (err) {
+    console.error('Failed to load files:', err)
+  } finally {
     loading.value = false
-  }, 1200)
+  }
 })
 
 function triggerFileInput() {
   fileInput.value?.click()
 }
 
-function handleFileSelect(e) {
+async function handleFileSelect(e) {
   const selected = Array.from(e.target.files)
-  if (selected.length) mockUpload(selected)
+  if (!selected.length) return
+  
+  uploadError.value = ''
+  uploadProgress.value = 1
+  
+  for (const file of selected) {
+    const formData = new FormData()
+    formData.append('file', file)
+    
+    try {
+      const res = await filesApi.upload(formData, (progressEvent) => {
+        const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+        uploadProgress.value = percentCompleted
+      })
+      
+      files.value.unshift(res.data)
+      auth.fetchUser() // Refresh storage usage
+    } catch (err) {
+      console.error('Upload error:', err)
+      uploadError.value = err.response?.data?.detail || 'Upload failed'
+    }
+  }
+  
+  uploadProgress.value = 0
   e.target.value = ''
 }
 
-function mockUpload(fileList) {
-  uploadProgress.value = 1
-  let progress = 1
-  const interval = setInterval(() => {
-    progress += Math.random() * 20
-    if (progress >= 100) {
-      clearInterval(interval)
-      uploadProgress.value = 100
-      setTimeout(() => {
-        for (const f of fileList) {
-          files.value.unshift({
-            id: nextId++,
-            filename: f.name,
-            size: f.size,
-            mimetype: f.type || 'application/octet-stream',
-            created_at: new Date().toISOString(),
-          })
-        }
-        uploadProgress.value = 0
-      }, 500)
-    } else {
-      uploadProgress.value = Math.round(progress)
+async function shareFile(file) {
+  try {
+    const res = await sharesApi.create(file.id)
+    shareModal.value = {
+      show: true,
+      url: res.data.share_url,
     }
-  }, 200)
-}
-
-function shareFile(file) {
-  const fakeToken = btoa(file.filename).replace(/[^a-zA-Z0-9]/g, '').slice(0, 16)
-  shareModal.value = {
-    show: true,
-    url: `${window.location.origin}/share/${fakeToken}`,
+  } catch (err) {
+    console.error('Failed to share file:', err)
+    alert('Failed to create share link')
   }
 }
 
@@ -216,9 +212,33 @@ function copyShareLink() {
   setTimeout(() => (copied.value = false), 2000)
 }
 
-function deleteFile(id) {
-  if (confirm('Delete this file?')) {
+async function deleteFile(id) {
+  if (!confirm('Delete this file?')) return
+  
+  try {
+    await filesApi.delete(id)
     files.value = files.value.filter(f => f.id !== id)
+    auth.fetchUser() // Refresh storage usage
+  } catch (err) {
+    console.error('Failed to delete file:', err)
+    alert('Failed to delete file')
+  }
+}
+
+async function downloadFile(id, filename) {
+  try {
+    const res = await filesApi.download(id)
+    // Create a blob URL and trigger download
+    const url = window.URL.createObjectURL(new Blob([res.data]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', filename)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  } catch (err) {
+    console.error('Download error:', err)
+    alert('Failed to download file')
   }
 }
 

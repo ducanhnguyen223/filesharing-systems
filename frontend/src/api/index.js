@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
+    baseURL: import.meta.env.VITE_API_URL || '/api',
 })
 
 api.interceptors.request.use(config => {
@@ -33,13 +33,11 @@ export const filesApi = {
         headers: { 'Content-Type': 'multipart/form-data' },
         onUploadProgress: onProgress,
     }),
-    download: (id) => api.get(`/files/${id}/download`),
     delete: (id) => api.delete(`/files/${id}`),
-    share: (id) => api.post(`/files/${id}/share`),
 }
 
-export const shareApi = {
-    getPublic: (token) => api.get(`/share/${token}`),
+export const sharesApi = {
+    create: (fileId) => api.post('/shares/', { file_id: fileId }),
 }
 
 export default api

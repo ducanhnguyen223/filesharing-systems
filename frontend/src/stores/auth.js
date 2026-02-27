@@ -1,13 +1,5 @@
 import { defineStore } from 'pinia'
-
-// Mock user data — no API calls
-const MOCK_USER = {
-    id: 1,
-    email: 'demo@filesharing.com',
-    storage_used: 1.2 * 1024 ** 3, // 1.2 GB
-    plan_name: 'free',
-    created_at: '2026-02-20T10:00:00Z',
-}
+import { authApi } from '@/api/index'
 
 export const useAuthStore = defineStore('auth', {
     state: () => ({
@@ -29,28 +21,23 @@ export const useAuthStore = defineStore('auth', {
     },
 
     actions: {
-        // Mock login — just set token + user, no API
         async login(email, password) {
-            await delay(600) // simulate network
-            if (password.length < 3) throw { response: { data: { detail: 'Invalid credentials' } } }
-            this.token = 'mock-jwt-token'
+            const res = await authApi.login(email, password)
+            this.token = res.data.access_token
             localStorage.setItem('token', this.token)
-            this.user = { ...MOCK_USER, email }
+            await this.fetchUser()
         },
 
         async register(email, password) {
-            await delay(600)
-            if (password.length < 6) throw { response: { data: { detail: 'Password too short' } } }
-            this.token = 'mock-jwt-token'
+            const res = await authApi.register(email, password)
+            this.token = res.data.access_token
             localStorage.setItem('token', this.token)
-            this.user = { ...MOCK_USER, email, storage_used: 0 }
+            await this.fetchUser()
         },
 
         async fetchUser() {
-            await delay(200)
-            if (!this.user) {
-                this.user = { ...MOCK_USER }
-            }
+            const res = await authApi.me()
+            this.user = res.data
         },
 
         logout() {
@@ -60,7 +47,3 @@ export const useAuthStore = defineStore('auth', {
         },
     },
 })
-
-function delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms))
-}
