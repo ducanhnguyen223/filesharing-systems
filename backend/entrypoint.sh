@@ -7,6 +7,19 @@ until python -c "import psycopg2; psycopg2.connect('$DATABASE_URL')" 2>/dev/null
 done
 echo "Database ready."
 
+echo "Granting schema permissions..."
+python -c "
+import psycopg2, os
+conn = psycopg2.connect(os.environ['DATABASE_URL'])
+conn.autocommit = True
+cur = conn.cursor()
+cur.execute('CREATE SCHEMA IF NOT EXISTS public;')
+cur.execute('GRANT ALL ON SCHEMA public TO CURRENT_USER;')
+cur.close()
+conn.close()
+print('Done.')
+" 2>&1 || true
+
 echo "Running migrations..."
 alembic upgrade head
 
