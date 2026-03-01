@@ -1,5 +1,6 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, computed_field
 from datetime import datetime
+from app.files.service import classify_mimetype
 
 
 class FileResponse(BaseModel):
@@ -10,9 +11,15 @@ class FileResponse(BaseModel):
     spaces_key: str
     created_at: datetime
 
+    @computed_field
+    @property
+    def category(self) -> str:
+        return classify_mimetype(self.mimetype)
+
     model_config = {"from_attributes": True}
 
 
 class FileListResponse(BaseModel):
     files: list[FileResponse]
     total: int
+    category_counts: dict[str, int] = {}

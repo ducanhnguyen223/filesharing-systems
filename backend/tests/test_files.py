@@ -66,7 +66,10 @@ def test_list_files_empty(auth_client):
     client, _ = auth_client
     res = client.get("/files/")
     assert res.status_code == 200
-    assert res.json() == {"files": [], "total": 0}
+    data = res.json()
+    assert data["files"] == []
+    assert data["total"] == 0
+    assert "category_counts" in data
 
 
 def test_list_files_after_upload(auth_client):
@@ -100,9 +103,9 @@ def test_download_redirects(auth_client):
     client, storage = auth_client
     upload_res = _upload(client)
     file_id = upload_res.json()["id"]
-    res = client.get(f"/files/{file_id}/download", follow_redirects=False)
-    assert res.status_code in (302, 307)
-    assert "presigned" in res.headers["location"]
+    res = client.get(f"/files/{file_id}/download")
+    assert res.status_code == 200
+    assert "url" in res.json()
 
 
 def test_download_not_found(auth_client):

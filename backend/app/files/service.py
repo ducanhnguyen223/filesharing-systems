@@ -5,6 +5,36 @@ from app.core.models import User, File
 from app.files.storage import StorageClient
 
 
+def classify_mimetype(mimetype: str | None) -> str:
+    if not mimetype:
+        return "other"
+    if mimetype.startswith("image/"):
+        return "image"
+    if mimetype.startswith("video/"):
+        return "video"
+    if mimetype.startswith("audio/"):
+        return "audio"
+    if mimetype.startswith("text/") or mimetype in (
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/vnd.ms-excel",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "application/vnd.ms-powerpoint",
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    ):
+        return "document"
+    return "other"
+
+
+def get_category_counts(user: User, db: Session) -> dict[str, int]:
+    files = db.query(File).filter(File.user_id == user.id, File.is_deleted == False).all()
+    counts: dict[str, int] = {"image": 0, "video": 0, "audio": 0, "document": 0, "other": 0}
+    for f in files:
+        counts[classify_mimetype(f.mimetype)] += 1
+    return counts
+
+
 def upload_file(user: User, file: UploadFile, db: Session, storage: StorageClient) -> File:
     content = file.file.read()
     size = len(content)
@@ -35,8 +65,12 @@ def upload_file(user: User, file: UploadFile, db: Session, storage: StorageClien
     return db_file
 
 
-def list_files(user: User, db: Session) -> list[File]:
-    return db.query(File).filter(File.user_id == user.id, File.is_deleted == False).all()
+def list_files(user: User, db: Session, category: str | None = None) -> list[File]:
+    q = db.query(File).filter(File.user_id == user.id, File.is_deleted == False)
+    if category:
+        files = q.all()
+        return [f for f in files if classify_mimetype(f.mimetype) == category]
+    return q.all()
 
 
 def _get_file_or_404(user: User, file_id: int, db: Session) -> File:

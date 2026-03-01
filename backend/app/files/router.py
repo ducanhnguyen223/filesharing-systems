@@ -1,5 +1,4 @@
-from fastapi import APIRouter, Depends, UploadFile, File as FastAPIFile
-from fastapi.responses import RedirectResponse
+from fastapi import APIRouter, Depends, UploadFile, File as FastAPIFile, Query
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.auth.router import get_current_user_dep
@@ -25,11 +24,13 @@ def upload(
 
 @router.get("/", response_model=schemas.FileListResponse)
 def list_files(
+    category: str | None = Query(default=None, description="Filter by category: image, video, audio, document, other"),
     user=Depends(get_current_user_dep),
     db: Session = Depends(get_db),
 ):
-    files = service.list_files(user, db)
-    return {"files": files, "total": len(files)}
+    files = service.list_files(user, db, category=category)
+    counts = service.get_category_counts(user, db)
+    return {"files": files, "total": len(files), "category_counts": counts}
 
 
 @router.get("/{file_id}/download")
