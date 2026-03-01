@@ -28,7 +28,7 @@ export const authApi = {
 }
 
 export const filesApi = {
-    list: () => api.get('/files/'),
+    list: (category) => api.get('/files/' + (category ? `?category=${category}` : '')),
     upload: (formData, onProgress) => api.post('/files/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
         onUploadProgress: onProgress,

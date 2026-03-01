@@ -11,26 +11,29 @@
     </div>
     
     <nav class="flex-1 space-y-1">
-      <a class="flex items-center gap-3 px-3 py-2 bg-primary/10 text-primary rounded-lg font-semibold cursor-pointer">
-        <span class="material-symbols-outlined">dashboard</span> Dashboard
+      <a @click="setCategory('')" :class="activeCategory === '' ? 'bg-primary/10 text-primary font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-primary/5 cursor-pointer'" class="flex items-center justify-between px-3 py-2 rounded-lg transition-colors cursor-pointer">
+        <div class="flex items-center gap-3"><span class="material-symbols-outlined">dashboard</span> Dashboard</div>
+        <span v-if="totalFilesCount" class="bg-slate-200 dark:bg-slate-700 text-xs px-2 py-0.5 rounded-full font-medium">{{ totalFilesCount }}</span>
       </a>
-      <a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-primary/5 rounded-lg transition-colors cursor-pointer">
-        <span class="material-symbols-outlined">schedule</span> Recent files
+      <a @click="setCategory('document')" :class="activeCategory === 'document' ? 'bg-primary/10 text-primary font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-primary/5 cursor-pointer'" class="flex items-center justify-between px-3 py-2 rounded-lg transition-colors cursor-pointer">
+        <div class="flex items-center gap-3"><span class="material-symbols-outlined">description</span> Documents</div>
+        <span v-if="categoryCounts.document" class="bg-slate-200 dark:bg-slate-700 text-xs px-2 py-0.5 rounded-full font-medium">{{ categoryCounts.document }}</span>
       </a>
-      <a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-primary/5 rounded-lg transition-colors cursor-pointer">
-        <span class="material-symbols-outlined">description</span> Documents
+      <a @click="setCategory('image')" :class="activeCategory === 'image' ? 'bg-primary/10 text-primary font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-primary/5 cursor-pointer'" class="flex items-center justify-between px-3 py-2 rounded-lg transition-colors cursor-pointer">
+        <div class="flex items-center gap-3"><span class="material-symbols-outlined">image</span> Images</div>
+        <span v-if="categoryCounts.image" class="bg-slate-200 dark:bg-slate-700 text-xs px-2 py-0.5 rounded-full font-medium">{{ categoryCounts.image }}</span>
       </a>
-      <a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-primary/5 rounded-lg transition-colors cursor-pointer">
-        <span class="material-symbols-outlined">image</span> Images
+      <a @click="setCategory('video')" :class="activeCategory === 'video' ? 'bg-primary/10 text-primary font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-primary/5 cursor-pointer'" class="flex items-center justify-between px-3 py-2 rounded-lg transition-colors cursor-pointer">
+        <div class="flex items-center gap-3"><span class="material-symbols-outlined">videocam</span> Videos</div>
+        <span v-if="categoryCounts.video" class="bg-slate-200 dark:bg-slate-700 text-xs px-2 py-0.5 rounded-full font-medium">{{ categoryCounts.video }}</span>
       </a>
-      <a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-primary/5 rounded-lg transition-colors cursor-pointer">
-        <span class="material-symbols-outlined">videocam</span> Videos
+      <a @click="setCategory('audio')" :class="activeCategory === 'audio' ? 'bg-primary/10 text-primary font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-primary/5 cursor-pointer'" class="flex items-center justify-between px-3 py-2 rounded-lg transition-colors cursor-pointer">
+        <div class="flex items-center gap-3"><span class="material-symbols-outlined">audiotrack</span> Audios</div>
+        <span v-if="categoryCounts.audio" class="bg-slate-200 dark:bg-slate-700 text-xs px-2 py-0.5 rounded-full font-medium">{{ categoryCounts.audio }}</span>
       </a>
-      <a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-primary/5 rounded-lg transition-colors cursor-pointer">
-        <span class="material-symbols-outlined">audiotrack</span> Audios
-      </a>
-      <a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-primary/5 rounded-lg transition-colors cursor-pointer">
-        <span class="material-symbols-outlined">delete</span> Deleted files
+      <a @click="setCategory('other')" :class="activeCategory === 'other' ? 'bg-primary/10 text-primary font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-primary/5 cursor-pointer'" class="flex items-center justify-between px-3 py-2 rounded-lg transition-colors cursor-pointer">
+        <div class="flex items-center gap-3"><span class="material-symbols-outlined">insert_drive_file</span> Others</div>
+        <span v-if="categoryCounts.other" class="bg-slate-200 dark:bg-slate-700 text-xs px-2 py-0.5 rounded-full font-medium">{{ categoryCounts.other }}</span>
       </a>
     </nav>
     
@@ -90,25 +93,7 @@
         </div>
       </transition>
 
-      <!-- Recently Modified Section -->
-      <section v-if="files.length > 0">
-        <h2 class="text-lg font-bold mb-4 px-1">Recently modified</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          <div v-for="(file, i) in topRecentFiles" :key="file.id" @click="downloadFile(file.id, file.filename)"
-               class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-primary/5 shadow-sm hover:shadow-md hover:border-primary/20 transition-all cursor-pointer group">
-            <div class="flex items-center gap-3 mb-3">
-              <span class="material-symbols-outlined p-2 rounded-lg" :class="getIconStyle(file.mimetype).bg">{{ getCategoryIcon(file.mimetype) }}</span>
-              <div class="truncate">
-                <p class="font-semibold text-sm truncate group-hover:text-primary transition-colors" :title="file.filename">{{ file.filename }}</p>
-                <p class="text-xs text-slate-500">{{ formatBytes(file.size) }} • {{ formatRelative(file.created_at) }}</p>
-              </div>
-            </div>
-            <div class="h-24 w-full bg-slate-50 dark:bg-slate-800 rounded-lg flex items-center justify-center overflow-hidden border border-slate-100/50 group-hover:bg-slate-100 transition-colors">
-              <span class="material-symbols-outlined text-slate-300 text-4xl group-hover:scale-110 transition-transform">{{ getCategoryIcon(file.mimetype) }}</span>
-            </div>
-          </div>
-        </div>
-      </section>
+      <!-- Recently Modified Section (Removed) -->
 
       <!-- Distribution Chart Section -->
       <section v-if="!loading && chartCategories.length > 0" class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-primary/5 shadow-sm">
@@ -129,61 +114,97 @@
 
       <!-- Data Table Section -->
       <section class="bg-white dark:bg-slate-900 rounded-xl border border-primary/5 shadow-sm overflow-hidden flex flex-col">
-        <div class="p-4 border-b border-primary/5 flex justify-between items-center bg-white z-10 sticky top-0">
-          <h2 class="text-lg font-bold">All files</h2>
-          <button v-if="files.length > 0" class="text-primary text-sm font-semibold flex items-center gap-1 hover:text-indigo-700 transition-colors">
-            View All <span class="material-symbols-outlined text-sm">chevron_right</span>
-          </button>
-        </div>
-        <div class="overflow-x-auto">
-          <table v-if="!loading && files.length > 0" class="w-full text-left text-sm border-collapse">
-            <thead>
-              <tr class="bg-slate-50 dark:bg-slate-800/50 text-slate-500 font-medium uppercase text-[10px] tracking-wider">
-                <th class="py-3 px-4 w-10 text-center"><input class="rounded border-slate-300 text-primary focus:ring-primary h-4 w-4" type="checkbox"/></th>
-                <th class="py-3 px-4">Name</th>
-                <th class="py-3 px-4 hidden sm:table-cell">Owner</th>
-                <th class="py-3 px-4 hidden md:table-cell">File Size</th>
-                <th class="py-3 px-4">Modified</th>
-                <th class="py-3 px-4"></th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-              <tr v-for="file in filteredFiles" :key="file.id" @click="downloadFile(file.id, file.filename)" class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group">
-                <td class="py-4 px-4 text-center" @click.stop><input class="rounded border-slate-300 text-primary focus:ring-primary h-4 w-4" type="checkbox"/></td>
-                <td class="py-4 px-4 font-medium">
-                  <div class="flex items-center gap-3">
-                    <span class="material-symbols-outlined" :class="getIconStyle(file.mimetype).txt">{{ getCategoryIcon(file.mimetype) }}</span>
-                    <span class="truncate group-hover:text-primary transition-colors max-w-[200px]">{{ file.filename }}</span>
-                  </div>
-                </td>
-                <td class="py-4 px-4 hidden sm:table-cell text-slate-500">Me</td>
-                <td class="py-4 px-4 hidden md:table-cell text-slate-500">{{ formatBytes(file.size) }}</td>
-                <td class="py-4 px-4 text-slate-500 whitespace-nowrap">{{ formatDate(file.created_at) }}</td>
-                <td class="py-4 px-4 text-right" @click.stop>
-                  <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button @click="shareFile(file)" class="p-1 hover:bg-slate-200 text-slate-400 hover:text-primary rounded" title="Share"><span class="material-symbols-outlined">share</span></button>
-                    <button @click="deleteFile(file.id)" class="p-1 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded" title="Delete"><span class="material-symbols-outlined">delete</span></button>
-                    <button class="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded"><span class="material-symbols-outlined text-slate-400">more_vert</span></button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-
-          <div v-else-if="loading" class="p-16 text-center flex flex-col items-center justify-center gap-4 animate-pulse">
-              <div class="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin"></div>
+        <div class="p-4 border-b border-primary/5 bg-white dark:bg-slate-900 z-10 sticky top-0 flex flex-col gap-4">
+          <div class="flex justify-between items-center">
+            <h2 class="text-lg font-bold">{{ activeCategory ? activeCategory.charAt(0).toUpperCase() + activeCategory.slice(1) : 'All' }} files</h2>
+            <div class="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
+              <button @click="viewMode = 'list'" :class="viewMode === 'list' ? 'bg-white dark:bg-slate-700 shadow pointer-events-none text-primary' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'" class="p-1 rounded flex items-center justify-center transition-all" title="List View"><span class="material-symbols-outlined text-sm">view_list</span></button>
+              <button @click="viewMode = 'grid'" :class="viewMode === 'grid' ? 'bg-white dark:bg-slate-700 shadow pointer-events-none text-primary' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'" class="p-1 rounded flex items-center justify-center transition-all" title="Grid View"><span class="material-symbols-outlined text-sm">grid_view</span></button>
+            </div>
           </div>
           
-          <div v-else class="p-16 text-center flex flex-col items-center justify-center gap-4">
-              <div class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-300 mb-2">
-                  <span class="material-symbols-outlined text-3xl">inbox</span>
+          <!-- Storage Bar -->
+          <div v-if="storageBarData && storageBarData.length > 0" class="mb-2">
+            <div class="w-full h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full flex overflow-hidden mb-3">
+              <div v-for="seg in storageBarData" :key="seg.name" :class="seg.color" :style="{width: seg.percent + '%'}" class="h-full border-r border-white/20 last:border-r-0 transition-all duration-500"></div>
+            </div>
+            <div class="flex flex-wrap gap-x-4 gap-y-2 text-xs">
+              <div v-for="seg in storageBarData" :key="seg.name" class="flex items-center gap-1.5 focus:outline-none">
+                <span class="w-2.5 h-2.5 rounded-full" :class="seg.color"></span>
+                <span class="font-medium text-slate-700 dark:text-slate-300">{{ seg.name }}</span>
+                <span class="text-slate-400">· {{ formatBytes(seg.size) }}</span>
               </div>
-              <div>
-                  <h3 class="text-slate-800 font-bold mb-1">Your vault is empty</h3>
-                  <p class="text-slate-500 text-sm mb-6">Upload files to securely store them.</p>
-              </div>
+            </div>
           </div>
+        </div>
+        <div v-if="!loading && files.length > 0">
+          <!-- List View -->
+          <div v-if="viewMode === 'list'" class="overflow-x-auto">
+            <table class="w-full text-left text-sm border-collapse">
+              <thead>
+                <tr class="bg-slate-50 dark:bg-slate-800/50 text-slate-500 font-medium uppercase text-[10px] tracking-wider">
+                  <th class="py-3 px-4 w-10 text-center"><input class="rounded border-slate-300 text-primary focus:ring-primary h-4 w-4" type="checkbox"/></th>
+                  <th class="py-3 px-4">Name</th>
+                  <th class="py-3 px-4 hidden sm:table-cell">Owner</th>
+                  <th class="py-3 px-4 hidden md:table-cell">File Size</th>
+                  <th class="py-3 px-4">Modified</th>
+                  <th class="py-3 px-4"></th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                <tr v-for="file in filteredFiles" :key="file.id" @click="downloadFile(file.id, file.filename)" class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group">
+                  <td class="py-4 px-4 text-center" @click.stop><input class="rounded border-slate-300 text-primary focus:ring-primary h-4 w-4" type="checkbox"/></td>
+                  <td class="py-4 px-4 font-medium">
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined" :class="getIconStyle(file.mimetype).txt">{{ getCategoryIcon(file.mimetype) }}</span>
+                      <span class="truncate group-hover:text-primary transition-colors max-w-[200px]">{{ file.filename }}</span>
+                    </div>
+                  </td>
+                  <td class="py-4 px-4 hidden sm:table-cell text-slate-500">Me</td>
+                  <td class="py-4 px-4 hidden md:table-cell text-slate-500">{{ formatBytes(file.size) }}</td>
+                  <td class="py-4 px-4 text-slate-500 whitespace-nowrap">{{ formatDate(file.created_at) }}</td>
+                  <td class="py-4 px-4 text-right" @click.stop>
+                    <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button @click="shareFile(file)" class="p-1 hover:bg-slate-200 text-slate-400 hover:text-primary rounded" title="Share"><span class="material-symbols-outlined">share</span></button>
+                      <button @click="deleteFile(file.id)" class="p-1 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded" title="Delete"><span class="material-symbols-outlined">delete</span></button>
+                      <button class="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded"><span class="material-symbols-outlined text-slate-400">more_vert</span></button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <!-- Grid View -->
+          <div v-else-if="viewMode === 'grid'" class="p-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <div v-for="file in filteredFiles" :key="file.id" @click="downloadFile(file.id, file.filename)" class="bg-white border border-slate-100 dark:bg-slate-800/40 dark:border-slate-800 rounded-xl p-4 cursor-pointer hover:border-primary/30 hover:shadow-md transition-all flex flex-col group relative">
+              <div class="h-24 flex items-center justify-center bg-slate-50 dark:bg-slate-900 rounded-lg mb-3 shadow-sm group-hover:bg-slate-100 dark:group-hover:bg-slate-800 transition-colors">
+                <span class="material-symbols-outlined text-5xl transition-transform group-hover:scale-110" :class="getIconStyle(file.mimetype).txt">{{ getCategoryIcon(file.mimetype) }}</span>
+              </div>
+              <div class="truncate text-sm font-semibold group-hover:text-primary transition-colors pb-1" :title="file.filename">{{ file.filename }}</div>
+              <div class="flex justify-between items-center mt-auto pt-2 border-t border-slate-50 dark:border-slate-800">
+                <div class="text-[11px] text-slate-500">{{ formatBytes(file.size) }}</div>
+                <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button @click.stop="shareFile(file)" class="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-primary rounded" title="Share"><span class="material-symbols-outlined text-sm">share</span></button>
+                  <button @click.stop="deleteFile(file.id)" class="p-1 hover:bg-red-50 dark:hover:bg-red-900/20 text-slate-400 hover:text-red-500 rounded" title="Delete"><span class="material-symbols-outlined text-sm">delete</span></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
+        <div v-else-if="loading" class="p-16 text-center flex flex-col items-center justify-center gap-4 animate-pulse">
+            <div class="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin"></div>
+        </div>
+        
+        <div v-else class="p-16 text-center flex flex-col items-center justify-center gap-4">
+            <div class="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-slate-300 dark:text-slate-600 mb-2">
+                <span class="material-symbols-outlined text-3xl">inbox</span>
+            </div>
+            <div>
+                <h3 class="text-slate-800 dark:text-slate-200 font-bold mb-1">Your vault is empty</h3>
+                <p class="text-slate-500 text-sm mb-6">Upload files to securely store them.</p>
+            </div>
         </div>
       </section>
     </div>
@@ -293,17 +314,40 @@ const searchQuery = ref('')
 const copied = ref(false)
 const shareModal = ref({ show: false, url: '' })
 
-onMounted(async () => {
-  if (auth.isLoggedIn) await auth.fetchUser()
+// Category Filter States
+const activeCategory = ref('')
+const categoryCounts = ref({ document: 0, image: 0, video: 0, audio: 0, other: 0 })
+const viewMode = ref('list') // 'list' or 'grid'
+const totalFilesCount = ref(0)
+
+const fetchFiles = async () => {
+  loading.value = true
   try {
-    const res = await filesApi.list()
+    const res = await filesApi.list(activeCategory.value)
     files.value = res.data.files || res.data || []
+    if (res.data.category_counts) {
+      categoryCounts.value = { ...categoryCounts.value, ...res.data.category_counts }
+      totalFilesCount.value = res.data.total || 0
+    } else {
+      // Fallback update if API hasn't implemented counts yet
+      totalFilesCount.value = files.value.length
+    }
   } catch (err) {
     console.error('Failed to load files:', err)
   } finally {
     loading.value = false
   }
+}
+
+onMounted(async () => {
+  if (auth.isLoggedIn) await auth.fetchUser()
+  await fetchFiles()
 })
+
+function setCategory(cat) {
+  activeCategory.value = cat
+  fetchFiles()
+}
 
 function triggerFileInput() { fileInput.value?.click() }
 
@@ -427,6 +471,47 @@ const chartCategories = computed(() => {
     const sz = files.value.reduce((a,f) => a + (f.filename.length % (ix+1)) * f.size, 0)
     return { name: day, bgClass: ['bg-primary/20', 'bg-primary/30', 'bg-primary/50', 'bg-primary/20', 'bg-primary/30', 'bg-primary/20', 'bg-primary/20'][ix], percent: total ? Math.min((sz/(total*3))*100, 100) : 0 }
   })
+})
+
+const storageBarData = computed(() => {
+  if (files.value.length === 0) return null
+  
+  const cats = ['doc', 'img', 'video', 'audio', 'other']
+  const mapCat = {
+    document: 'doc', image: 'img', video: 'video', audio: 'audio', other: 'other'
+  }
+  const colorMap = {
+     doc: 'bg-blue-500', img: 'bg-violet-500', video: 'bg-purple-400', audio: 'bg-amber-400', other: 'bg-rose-400'
+  }
+  const nameMap = {
+     doc: 'Documents', img: 'Images', video: 'Videos', audio: 'Audio', other: 'Other'
+  }
+  
+  let totalSizeAll = 0
+  const sizes = { doc: 0, img: 0, video: 0, audio: 0, other: 0 }
+  
+  files.value.forEach(f => {
+    let internalCat = 'other'
+    if (f.category) {
+      internalCat = mapCat[f.category] || 'other'
+    } else {
+      if (f.mimetype.includes('image')) internalCat = 'img'
+      else if (f.mimetype.includes('video')) internalCat = 'video'
+      else if (f.mimetype.includes('audio')) internalCat = 'audio'
+      else if (f.mimetype.includes('pdf') || f.mimetype.includes('document') || f.mimetype.includes('text')) internalCat = 'doc'
+    }
+    sizes[internalCat] += f.size || 0
+    totalSizeAll += f.size || 0
+  })
+
+  if (totalSizeAll === 0) return null
+
+  return cats.map(c => ({
+    name: nameMap[c],
+    color: colorMap[c],
+    size: sizes[c],
+    percent: (sizes[c] / totalSizeAll) * 100
+  })).filter(c => c.size > 0)
 })
 
 function formatBytes(b) {
