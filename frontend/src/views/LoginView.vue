@@ -1,48 +1,157 @@
 <template>
-  <div class="auth-page">
-    <div class="auth-left">
-      <div class="auth-brand">
-        <div class="brand-icon"><span class="mi">cloud</span></div>
-        <span class="brand-name">DocuVault</span>
+<div class="flex flex-col lg:flex-row min-h-screen w-full overflow-hidden font-display">
+  <!-- Left Side: Branding & Features -->
+  <div class="relative flex w-full lg:w-1/2 flex-col justify-between bg-primary p-8 lg:p-16 overflow-hidden">
+    <!-- Abstract Background Shapes -->
+    <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-purple-900/20 rounded-full blur-3xl"></div>
+    <div class="absolute top-[40%] right-[-5%] w-64 h-64 bg-indigo-400/20 rounded-full blur-2xl"></div>
+    
+    <div class="relative z-10">
+      <!-- Logo -->
+      <div class="flex items-center gap-3 mb-12">
+        <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-white/20 text-white backdrop-blur-sm">
+          <span class="material-symbols-outlined text-2xl">cloud</span>
+        </div>
+        <h1 class="text-white text-2xl font-black tracking-tight">DocuVault</h1>
       </div>
-      <h1>Your files.<br/>Anywhere. Securely.</h1>
-      <p class="tagline">Upload, share, and manage your documents in one beautiful place.</p>
-      <div class="features">
-        <div class="feat"><span class="mi">rocket_launch</span> Lightning fast uploads</div>
-        <div class="feat"><span class="mi">lock</span> End-to-end encryption</div>
-        <div class="feat"><span class="mi">link</span> One-click file sharing</div>
-        <div class="feat"><span class="mi">devices</span> Access from any device</div>
+
+      <!-- Hero Text -->
+      <div class="mb-12">
+        <h2 class="text-white text-4xl lg:text-5xl font-bold leading-tight tracking-tight mb-4">
+            Your files, anywhere, <br/>securely.
+        </h2>
+        <p class="text-indigo-100 text-lg font-medium max-w-md opacity-90">
+            Experience the next generation of cloud storage. Unmatched speed, military-grade security.
+        </p>
+      </div>
+
+      <!-- Feature List -->
+      <div class="grid gap-6">
+        <div class="flex items-start gap-4">
+          <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-white/10 text-white backdrop-blur-sm shrink-0">
+            <span class="material-symbols-outlined">bolt</span>
+          </div>
+          <div class="flex flex-col">
+            <h3 class="text-white text-lg font-bold">Lightning fast uploads</h3>
+            <p class="text-indigo-200 text-sm">Upload large files in seconds with optimized routing.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4">
+          <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-white/10 text-white backdrop-blur-sm shrink-0">
+            <span class="material-symbols-outlined">lock</span>
+          </div>
+          <div class="flex flex-col">
+            <h3 class="text-white text-lg font-bold">End-to-end encryption</h3>
+            <p class="text-indigo-200 text-sm">Your data is encrypted before it leaves your device.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4">
+          <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-white/10 text-white backdrop-blur-sm shrink-0">
+            <span class="material-symbols-outlined">share</span>
+          </div>
+          <div class="flex flex-col">
+            <h3 class="text-white text-lg font-bold">One-click sharing</h3>
+            <p class="text-indigo-200 text-sm">Securely share folders with granular permissions.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4">
+          <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-white/10 text-white backdrop-blur-sm shrink-0">
+            <span class="material-symbols-outlined">devices</span>
+          </div>
+          <div class="flex flex-col">
+            <h3 class="text-white text-lg font-bold">Access from any device</h3>
+            <p class="text-indigo-200 text-sm">Seamless sync across desktop, mobile, and web.</p>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="auth-right">
-      <div class="form-card">
-        <h2>Welcome back</h2>
-        <p class="subtitle">Sign in to your account</p>
-        <form @submit.prevent="submit" class="form">
-          <div class="field">
-            <label for="email">Email</label>
-            <div class="input-wrap">
-              <span class="mi input-icon">mail</span>
-              <input id="email" v-model="email" type="email" placeholder="you@example.com" required autocomplete="email" />
+    
+    <div class="relative z-10 mt-12 text-indigo-200 text-sm font-medium">
+        © 2026 DocuVault Inc. All rights reserved.
+    </div>
+  </div>
+
+  <!-- Right Side: Login Form -->
+  <div class="flex w-full lg:w-1/2 flex-col justify-center items-center bg-background-light p-6 lg:p-12">
+    <div class="w-full max-w-[480px] bg-white rounded-2xl shadow-xl p-8 lg:p-10 border border-slate-100">
+      <div class="text-center mb-8">
+        <h1 class="text-slate-900 text-3xl font-bold tracking-tight mb-2">Welcome back</h1>
+        <p class="text-slate-500 text-base">Sign in to your DocuVault account</p>
+      </div>
+
+      <div v-if="error" class="mb-6 bg-red-50 border border-red-200 text-red-600 p-4 rounded-lg text-sm font-medium flex items-center gap-2">
+        <span class="material-symbols-outlined text-red-500">error</span>
+        <span>{{ error }}</span>
+      </div>
+
+      <form @submit.prevent="submit" class="flex flex-col gap-5">
+        <!-- Email Input -->
+        <div class="flex flex-col gap-2">
+          <label class="text-slate-900 text-sm font-semibold" for="email">Email address</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400">
+              <span class="material-symbols-outlined text-xl">mail</span>
             </div>
+            <input v-model="email" id="email" type="email" required placeholder="name@company.com" 
+                   class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" />
           </div>
-          <div class="field">
-            <label for="password">Password</label>
-            <div class="input-wrap">
-              <span class="mi input-icon">lock</span>
-              <input id="password" v-model="password" type="password" placeholder="Enter your password" required autocomplete="current-password" />
+        </div>
+
+        <!-- Password Input -->
+        <div class="flex flex-col gap-2">
+          <div class="flex justify-between items-center">
+            <label class="text-slate-900 text-sm font-semibold" for="password">Password</label>
+            <a href="#" class="text-primary text-sm font-semibold hover:underline">Forgot?</a>
+          </div>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400">
+              <span class="material-symbols-outlined text-xl">lock</span>
             </div>
+            <input v-model="password" id="password" type="password" required placeholder="Enter your password" 
+                   class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" />
           </div>
-          <p v-if="error" class="error">{{ error }}</p>
-          <button type="submit" class="btn-submit" :disabled="loading">
-            <span v-if="loading" class="spinner"></span>
-            <span v-else>Sign In</span>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" :disabled="loading" 
+                class="mt-2 w-full bg-primary hover:bg-indigo-600 text-white font-bold py-3.5 px-6 rounded-lg transition-colors flex items-center justify-center gap-2 group disabled:opacity-70 disabled:cursor-not-allowed">
+          <span>{{ loading ? 'Signing in...' : 'Sign In' }}</span>
+          <span v-if="!loading" class="material-symbols-outlined text-sm transition-transform group-hover:translate-x-1">arrow_forward</span>
+          <span v-else class="material-symbols-outlined text-sm animate-spin">refresh</span>
+        </button>
+
+        <div class="relative my-4">
+          <div class="absolute inset-0 flex items-center">
+            <div class="w-full border-t border-slate-200"></div>
+          </div>
+          <div class="relative flex justify-center text-sm">
+            <span class="bg-white px-2 text-slate-500">Or continue with</span>
+          </div>
+        </div>
+
+        <!-- Social Buttons -->
+        <div class="grid grid-cols-2 gap-3">
+          <button type="button" class="flex items-center justify-center gap-2 bg-white border border-slate-200 rounded-lg py-2.5 px-4 hover:bg-slate-50 transition-colors">
+            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0A53P53GSmACgsNGljTRWULp7FgGtfSthhgwb7rajwzjyGQHpF4DgsfypPwLa6fDSXaQ91T3B8eUmwhJT4cl9MoNQJROG0kAKkiwJJGKVDJbrd2Oy_SzHXuCsU--ZX_6CToE7JfuiAaGHwmXPcFkiYeaujHkB6-pUe2_QeCizIle59SlkyqEx6_3jBJrFi-Ga6zylQRCP35GWyYEYxXIGCoxxDVCLD48ojDzzWCQlDYVh1UAeoRqkyaAjqeatwnFVbXcWFnJZLNHi" class="w-5 h-5" alt="Google">
+            <span class="text-slate-700 font-medium text-sm">Google</span>
           </button>
-        </form>
-        <p class="footer-text">Don't have an account? <RouterLink to="/register" class="link">Create one</RouterLink></p>
+          <button type="button" class="flex items-center justify-center gap-2 bg-white border border-slate-200 rounded-lg py-2.5 px-4 hover:bg-slate-50 transition-colors">
+            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDmUh1Fu-vc7CdevToeSvorTwNTQ2Pj7F_UamaQrFiPZ8q4TsFH-TL1RwIzxLKb4BYWJfX85uGViwNM5EQqRZL2cJ1T-hAe6Pdyl5x3LRSQpsk9AD8yE1CYEQ_CSjhBcIJC_jlRfURGEmUr2EtyLsM753qAKwaWGys_rLSE42AOhNkYOJ6mvP6LAJjy2QM_DH6A-B8wlJQRNPXArIDNjHpfCGAft44xVZ6orkkHNtLXMW4c0SQd33gec9_aoS7Oass3kpcyQBVOeZbz" class="w-5 h-5" alt="Microsoft">
+            <span class="text-slate-700 font-medium text-sm">Microsoft</span>
+          </button>
+        </div>
+      </form>
+
+      <div class="mt-8 text-center">
+        <p class="text-slate-500 text-sm">
+          Don't have an account? 
+          <router-link to="/register" class="text-primary font-bold hover:underline">Create one</router-link>
+        </p>
       </div>
     </div>
   </div>
+</div>
 </template>
 
 <script setup>
@@ -50,100 +159,24 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
+const router = useRouter()
+const authStore = useAuthStore()
+
 const email = ref('')
 const password = ref('')
 const error = ref('')
 const loading = ref(false)
-const auth = useAuthStore()
-const router = useRouter()
 
-async function submit() {
-  loading.value = true
+const submit = async () => {
   error.value = ''
+  loading.value = true
   try {
-    await auth.login(email.value, password.value)
+    await authStore.login(email.value, password.value)
     router.push('/')
-  } catch (e) {
-    error.value = e.response?.data?.detail || 'Failed to sign in. Check your credentials.'
+  } catch (err) {
+    error.value = err.response?.data?.detail || 'Invalid email or password'
   } finally {
     loading.value = false
   }
 }
 </script>
-
-<style scoped>
-.auth-page { display: flex; min-height: 100vh; }
-
-.auth-left {
-  flex: 1; background: linear-gradient(135deg, #6c47ff 0%, #a855f7 100%);
-  padding: 64px; display: flex; flex-direction: column; justify-content: center; color: #fff;
-  position: relative; overflow: hidden;
-}
-.auth-left::before {
-  content: ''; position: absolute; width: 400px; height: 400px; border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06); top: -100px; right: -100px;
-}
-.auth-left::after {
-  content: ''; position: absolute; width: 250px; height: 250px; border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06); bottom: -50px; left: -50px;
-}
-.auth-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 48px; position: relative; z-index: 1; }
-.brand-icon {
-  width: 36px; height: 36px; border-radius: 10px;
-  background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(8px);
-  display: flex; align-items: center; justify-content: center; color: #fff;
-}
-.brand-name { font-size: 1.2rem; font-weight: 700; }
-.auth-left h1 { font-size: 2.5rem; font-weight: 800; line-height: 1.2; margin-bottom: 16px; letter-spacing: -0.02em; position: relative; z-index: 1; }
-.tagline { font-size: 1.1rem; opacity: 0.85; margin-bottom: 48px; line-height: 1.6; position: relative; z-index: 1; }
-.features { display: flex; flex-direction: column; gap: 14px; position: relative; z-index: 1; }
-.feat { display: flex; align-items: center; gap: 12px; font-size: 0.95rem; opacity: 0.8; }
-
-.auth-right {
-  flex: 1; background: var(--bg, #f5f5f7);
-  display: flex; align-items: center; justify-content: center; padding: 48px;
-}
-.form-card {
-  width: 100%; max-width: 400px; background: #fff; padding: 48px;
-  border-radius: 20px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.04);
-}
-h2 { font-size: 1.6rem; font-weight: 700; margin-bottom: 6px; color: var(--text, #1a1a2e); }
-.subtitle { color: var(--text-muted, #9ca3af); font-size: 0.9rem; margin-bottom: 32px; }
-
-.form { display: flex; flex-direction: column; gap: 18px; }
-.field label { display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 6px; color: #374151; }
-.input-wrap { position: relative; }
-.input-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted, #9ca3af); font-size: 18px; }
-.input-wrap input {
-  width: 100%; padding: 11px 14px 11px 40px;
-  border: 1px solid var(--border, #e8e8ee); border-radius: 10px; font-size: 0.92rem;
-  outline: none; transition: all 0.2s; background: #f9fafb; color: var(--text, #1a1a2e);
-}
-.input-wrap input:focus { border-color: var(--primary, #6c47ff); box-shadow: 0 0 0 3px rgba(108, 71, 255, 0.1); background: #fff; }
-
-.error { color: #ef4444; font-size: 0.82rem; text-align: center; padding: 8px; background: #fef2f2; border-radius: 8px; }
-
-.btn-submit {
-  width: 100%; padding: 13px; background: var(--primary, #6c47ff); color: #fff;
-  border: none; border-radius: 10px; font-size: 0.95rem; font-weight: 600;
-  display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s;
-}
-.btn-submit:hover { background: var(--primary-dark, #5835db); }
-.btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
-
-.footer-text { text-align: center; margin-top: 24px; font-size: 0.85rem; color: var(--text-muted, #9ca3af); }
-.link { color: var(--primary, #6c47ff); font-weight: 600; text-decoration: none; }
-.link:hover { text-decoration: underline; }
-
-.spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-@media (max-width: 768px) {
-  .auth-page { flex-direction: column; }
-  .auth-left { padding: 32px; min-height: 200px; }
-  .auth-left h1 { font-size: 1.8rem; }
-  .features { display: none; }
-  .auth-right { padding: 24px; }
-  .form-card { padding: 32px; }
-}
-</style>

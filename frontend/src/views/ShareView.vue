@@ -1,32 +1,64 @@
 <template>
-  <div class="share-page">
-    <div class="share-card" v-if="loading">
-      <div class="loading-state"><div class="spinner"></div><p>Retrieving shared file...</p></div>
+  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-slate-50 to-purple-50 p-6 font-display">
+    
+    <!-- Loading State -->
+    <div v-if="loading" class="w-full max-w-md bg-white rounded-2xl p-12 shadow-xl shadow-primary/5 text-center flex flex-col items-center gap-4">
+      <div class="w-10 h-10 border-4 border-slate-100 border-t-primary rounded-full animate-spin"></div>
+      <p class="text-slate-500 font-medium">Retrieving shared file...</p>
     </div>
 
-    <div class="share-card" v-else-if="fileData">
-      <div class="share-top">
-        <div class="brand"><div class="brand-icon"><span class="mi">cloud</span></div><span class="brand-text">DocuVault</span></div>
-        <p class="notice">A file has been shared with you</p>
+    <!-- Success State -->
+    <div v-else-if="fileData" class="w-full max-w-md bg-white rounded-2xl p-10 shadow-xl shadow-primary/5 text-center relative overflow-hidden group">
+      
+      <!-- Decorative BG -->
+      <div class="absolute -top-10 -right-10 w-32 h-32 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors duration-500"></div>
+
+      <div class="relative z-10 mb-8">
+        <div class="flex items-center justify-center gap-3 mb-3">
+          <div class="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center">
+            <span class="material-symbols-outlined text-xl">cloud</span>
+          </div>
+          <span class="text-xl font-bold tracking-tight text-slate-800">DocuVault</span>
+        </div>
+        <p class="text-slate-500 text-sm font-medium">A file has been shared with you</p>
       </div>
-      <div class="file-preview"><span class="mi" style="font-size:48px">{{ getFileIcon(fileData.filename) }}</span></div>
-      <h1 class="fname" :title="fileData.filename">{{ fileData.filename }}</h1>
-      <p class="fmeta">{{ formatBytes(fileData.size) }} · Shared via link</p>
-      <button class="btn-dl" @click="handleDownload" :disabled="downloading">
-        <span v-if="downloading" class="spinner-sm"></span>
-        <span v-else><span class="mi">download</span> Download File</span>
-      </button>
-      <p class="share-footer">Want your own cloud? <RouterLink to="/register" class="link">Sign up free →</RouterLink></p>
+
+      <div class="relative z-10 flex flex-col items-center mb-8">
+        <div class="w-24 h-24 rounded-2xl bg-indigo-50 flex items-center justify-center mb-5 text-primary shadow-inner">
+          <span class="material-symbols-outlined text-[48px]">{{ getFileIcon(fileData.filename) }}</span>
+        </div>
+        <h1 class="text-xl font-bold text-slate-900 mb-1 w-full truncate px-4" :title="fileData.filename">{{ fileData.filename }}</h1>
+        <p class="text-slate-400 text-sm">{{ formatBytes(fileData.size) }} • Shared via link</p>
+      </div>
+
+      <div class="relative z-10">
+        <button @click="handleDownload" :disabled="downloading" class="w-full bg-primary hover:bg-indigo-600 text-white font-bold py-3.5 px-6 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-wait shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 active:scale-[0.98]">
+          <span v-if="downloading" class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+          <template v-else>
+            <span class="material-symbols-outlined text-lg">download</span>
+            <span>Download File</span>
+          </template>
+        </button>
+      </div>
+
+      <p class="relative z-10 mt-8 text-xs text-slate-400 font-medium">
+        Want your own secure cloud? 
+        <RouterLink to="/register" class="text-primary hover:text-indigo-600 hover:underline font-bold transition-colors">Sign up free →</RouterLink>
+      </p>
     </div>
 
-    <div class="share-card" v-else>
-      <div class="error-state">
-        <span class="mi" style="font-size:48px;color:var(--text-muted,#9ca3af)">link_off</span>
-        <h2>Link Not Found</h2>
-        <p>This share link is invalid or has expired.</p>
-        <RouterLink to="/" class="btn-home">Go to DocuVault</RouterLink>
+    <!-- Error State -->
+    <div v-else class="w-full max-w-md bg-white rounded-2xl p-10 shadow-xl shadow-primary/5 text-center flex flex-col items-center gap-4">
+      <div class="w-20 h-20 rounded-2xl bg-red-50 text-red-400 flex items-center justify-center mb-2">
+        <span class="material-symbols-outlined text-[48px]">link_off</span>
       </div>
+      <h2 class="text-xl font-bold text-slate-900">Link Not Found</h2>
+      <p class="text-slate-500 text-sm mb-4 leading-relaxed">This share link is invalid, has expired, or the file was deleted by the owner.</p>
+      <RouterLink to="/" class="bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold py-2.5 px-6 rounded-xl transition-colors border border-slate-200">
+        Go to DocuVault
+      </RouterLink>
     </div>
+
   </div>
 </template>
 
@@ -63,7 +95,7 @@ async function handleDownload() {
     window.open(res.data.url, '_blank')
   } catch (err) {
     console.error('Download error:', err)
-    alert('Failed to download')
+    alert('Failed to download file securely')
   } finally {
     downloading.value = false
   }
@@ -90,37 +122,3 @@ function formatBytes(b) {
   return b+' B'
 }
 </script>
-
-<style scoped>
-.share-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #f0ecff, #f5f5f7, #fdf2f8); padding: 32px; }
-.share-card { width: 100%; max-width: 460px; background: #fff; border-radius: 20px; padding: 48px; box-shadow: 0 8px 30px rgba(0,0,0,0.06); text-align: center; }
-
-.share-top { margin-bottom: 28px; }
-.brand { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px; }
-.brand-icon { width: 36px; height: 36px; border-radius: 10px; background: #6c47ff; color: #fff; display: flex; align-items: center; justify-content: center; }
-.brand-text { font-size: 1.15rem; font-weight: 700; }
-.notice { color: #6b7280; font-size: 0.9rem; }
-
-.file-preview { width: 88px; height: 88px; border-radius: 16px; background: #f0ecff; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: #6c47ff; }
-.fname { font-size: 1.2rem; font-weight: 700; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.fmeta { color: #9ca3af; font-size: 0.9rem; margin-bottom: 28px; }
-
-.btn-dl { width: 100%; padding: 14px; background: #6c47ff; color: #fff; border: none; border-radius: 12px; font-size: 0.95rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; }
-.btn-dl:hover { background: #5835db; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(108,71,255,0.3); }
-.btn-dl:disabled { opacity: 0.6; cursor: wait; }
-
-.share-footer { margin-top: 28px; font-size: 0.82rem; color: #9ca3af; }
-.link { color: #6c47ff; font-weight: 600; text-decoration: none; }
-.link:hover { text-decoration: underline; }
-
-.error-state { padding: 16px 0; display: flex; flex-direction: column; align-items: center; gap: 12px; }
-.error-state h2 { font-size: 1.3rem; font-weight: 700; }
-.error-state p { color: #6b7280; margin-bottom: 12px; }
-.btn-home { padding: 10px 24px; background: #f0ecff; color: #6c47ff; border-radius: 10px; font-weight: 600; display: inline-block; transition: background 0.2s; }
-.btn-home:hover { background: #e2dcff; }
-
-.loading-state { padding: 32px 0; display: flex; flex-direction: column; align-items: center; gap: 16px; color: #6b7280; }
-.spinner { width: 28px; height: 28px; border: 3px solid #e8e8ee; border-top-color: #6c47ff; border-radius: 50%; animation: spin 0.7s linear infinite; }
-.spinner-sm { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-</style>
