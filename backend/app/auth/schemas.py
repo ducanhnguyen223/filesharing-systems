@@ -21,3 +21,9 @@ class UserResponse(BaseModel):
     plan_name: str
 
     model_config = {"from_attributes": True}
+
+
+class UpdateProfileRequest(BaseModel):
+    email: EmailStr | None = None
+    current_password: str | None = None
+    new_password: str | None = None

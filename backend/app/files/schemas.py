@@ -23,3 +23,11 @@ class FileListResponse(BaseModel):
     files: list[FileResponse]
     total: int
     category_counts: dict[str, int] = {}
+
+
+class BulkDeleteRequest(BaseModel):
+    file_ids: list[int]
+
+
+class BulkDeleteResponse(BaseModel):
+    deleted: int

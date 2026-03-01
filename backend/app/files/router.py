@@ -33,6 +33,17 @@ def list_files(
     return {"files": files, "total": len(files), "category_counts": counts}
 
 
+@router.post("/bulk-delete", response_model=schemas.BulkDeleteResponse)
+def bulk_delete(
+    body: schemas.BulkDeleteRequest,
+    user=Depends(get_current_user_dep),
+    db: Session = Depends(get_db),
+    storage: StorageClient = Depends(get_storage_dep),
+):
+    deleted = service.bulk_delete_files(user, body.file_ids, db, storage)
+    return {"deleted": deleted}
+
+
 @router.get("/{file_id}/download")
 def download(
     file_id: int,

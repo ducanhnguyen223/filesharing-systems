@@ -88,6 +88,22 @@ def delete_file(user: User, file_id: int, db: Session, storage: StorageClient) -
     db.commit()
 
 
+def bulk_delete_files(user: User, file_ids: list[int], db: Session, storage: StorageClient) -> int:
+    files = (
+        db.query(File)
+        .filter(File.id.in_(file_ids), File.user_id == user.id, File.is_deleted == False)
+        .all()
+    )
+    total_freed = 0
+    for f in files:
+        storage.delete_file(f.spaces_key)
+        f.is_deleted = True
+        total_freed += f.size
+    user.storage_used = max(0, user.storage_used - total_freed)
+    db.commit()
+    return len(files)
+
+
 def get_download_url(user: User, file_id: int, db: Session, storage: StorageClient) -> str:
     f = _get_file_or_404(user, file_id, db)
     return storage.get_presigned_url(f.spaces_key, expires=3600)

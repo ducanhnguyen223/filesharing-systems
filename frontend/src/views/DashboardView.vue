@@ -38,9 +38,9 @@
     </nav>
     
     <div class="mt-auto border-t border-slate-100 dark:border-slate-800 pt-4 space-y-1 flex flex-col">
-      <a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-primary/5 rounded-lg transition-colors cursor-pointer">
+      <RouterLink to="/settings" class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-primary/5 rounded-lg transition-colors">
         <span class="material-symbols-outlined">settings</span> Settings
-      </a>
+      </RouterLink>
       <a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-primary/5 rounded-lg transition-colors cursor-pointer">
         <span class="material-symbols-outlined">chat_bubble</span> Chat & Support
       </a>
@@ -137,13 +137,32 @@
             </div>
           </div>
         </div>
+        <!-- Bulk Action Bar -->
+        <transition name="fade">
+          <div v-if="selectedIds.size > 0" class="px-4 py-2.5 bg-primary/5 border-b border-primary/10 flex items-center gap-3">
+            <span class="text-sm font-medium text-primary">{{ selectedIds.size }} selected</span>
+            <button @click="bulkDelete" class="flex items-center gap-1.5 text-sm font-semibold text-red-500 hover:text-red-600 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors">
+              <span class="material-symbols-outlined text-base">delete</span> Delete
+            </button>
+            <button @click="clearSelection" class="text-sm text-slate-500 hover:text-slate-700 ml-auto">Cancel</button>
+          </div>
+        </transition>
+
         <div v-if="!loading && files.length > 0">
           <!-- List View -->
           <div v-if="viewMode === 'list'" class="overflow-x-auto">
             <table class="w-full text-left text-sm border-collapse">
               <thead>
                 <tr class="bg-slate-50 dark:bg-slate-800/50 text-slate-500 font-medium uppercase text-[10px] tracking-wider">
-                  <th class="py-3 px-4 w-10 text-center"><input class="rounded border-slate-300 text-primary focus:ring-primary h-4 w-4" type="checkbox"/></th>
+                  <th class="py-3 px-4 w-10 text-center">
+                    <input
+                      class="rounded border-slate-300 text-primary focus:ring-primary h-4 w-4 cursor-pointer"
+                      type="checkbox"
+                      :checked="isAllSelected"
+                      :indeterminate.prop="isSomeSelected"
+                      @change="toggleSelectAll"
+                    />
+                  </th>
                   <th class="py-3 px-4">Name</th>
                   <th class="py-3 px-4 hidden sm:table-cell">Owner</th>
                   <th class="py-3 px-4 hidden md:table-cell">File Size</th>
@@ -152,8 +171,15 @@
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                <tr v-for="file in filteredFiles" :key="file.id" @click="downloadFile(file.id, file.filename)" class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group">
-                  <td class="py-4 px-4 text-center" @click.stop><input class="rounded border-slate-300 text-primary focus:ring-primary h-4 w-4" type="checkbox"/></td>
+                <tr v-for="file in filteredFiles" :key="file.id" @click="downloadFile(file.id, file.filename)" :class="selectedIds.has(file.id) ? 'bg-primary/5' : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'" class="transition-colors cursor-pointer group">
+                  <td class="py-4 px-4 text-center" @click.stop>
+                    <input
+                      class="rounded border-slate-300 text-primary focus:ring-primary h-4 w-4 cursor-pointer"
+                      type="checkbox"
+                      :checked="selectedIds.has(file.id)"
+                      @change="toggleSelect(file.id)"
+                    />
+                  </td>
                   <td class="py-4 px-4 font-medium">
                     <div class="flex items-center gap-3">
                       <span class="material-symbols-outlined" :class="getIconStyle(file.mimetype).txt">{{ getCategoryIcon(file.mimetype) }}</span>
@@ -174,10 +200,25 @@
               </tbody>
             </table>
           </div>
-          
+
           <!-- Grid View -->
           <div v-else-if="viewMode === 'grid'" class="p-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            <div v-for="file in filteredFiles" :key="file.id" @click="downloadFile(file.id, file.filename)" class="bg-white border border-slate-100 dark:bg-slate-800/40 dark:border-slate-800 rounded-xl p-4 cursor-pointer hover:border-primary/30 hover:shadow-md transition-all flex flex-col group relative">
+            <div
+              v-for="file in filteredFiles" :key="file.id"
+              @click="selectedIds.size > 0 ? toggleSelect(file.id) : downloadFile(file.id, file.filename)"
+              :class="selectedIds.has(file.id) ? 'border-primary/50 bg-primary/5 shadow-md' : 'border-slate-100 dark:border-slate-800 hover:border-primary/30 hover:shadow-md bg-white dark:bg-slate-800/40'"
+              class="border rounded-xl p-4 cursor-pointer transition-all flex flex-col group relative"
+            >
+              <!-- Grid checkbox -->
+              <div class="absolute top-2 left-2 z-10" @click.stop="toggleSelect(file.id)">
+                <input
+                  class="rounded border-slate-300 text-primary focus:ring-primary h-4 w-4 cursor-pointer transition-opacity"
+                  :class="selectedIds.has(file.id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'"
+                  type="checkbox"
+                  :checked="selectedIds.has(file.id)"
+                  @change="toggleSelect(file.id)"
+                />
+              </div>
               <div class="h-24 flex items-center justify-center bg-slate-50 dark:bg-slate-900 rounded-lg mb-3 shadow-sm group-hover:bg-slate-100 dark:group-hover:bg-slate-800 transition-colors">
                 <span class="material-symbols-outlined text-5xl transition-transform group-hover:scale-110" :class="getIconStyle(file.mimetype).txt">{{ getCategoryIcon(file.mimetype) }}</span>
               </div>
@@ -299,7 +340,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { filesApi, sharesApi } from '@/api'
 
@@ -313,6 +354,16 @@ const fileInput = ref(null)
 const searchQuery = ref('')
 const copied = ref(false)
 const shareModal = ref({ show: false, url: '' })
+
+// Selection state
+const selectedIds = ref(new Set())
+
+const isAllSelected = computed(() =>
+  filteredFiles.value.length > 0 && filteredFiles.value.every(f => selectedIds.value.has(f.id))
+)
+const isSomeSelected = computed(() =>
+  filteredFiles.value.some(f => selectedIds.value.has(f.id)) && !isAllSelected.value
+)
 
 // Category Filter States
 const activeCategory = ref('')
@@ -394,10 +445,43 @@ async function deleteFile(id) {
   try {
     await filesApi.delete(id)
     files.value = files.value.filter(f => (f.id || f.file_id) !== id)
+    selectedIds.value.delete(id)
     auth.fetchUser()
   } catch (err) {
     console.error('Delete error:', err)
     alert('Failed to delete file')
+  }
+}
+
+function toggleSelect(id) {
+  const next = new Set(selectedIds.value)
+  next.has(id) ? next.delete(id) : next.add(id)
+  selectedIds.value = next
+}
+
+function toggleSelectAll() {
+  if (isAllSelected.value) {
+    selectedIds.value = new Set()
+  } else {
+    selectedIds.value = new Set(filteredFiles.value.map(f => f.id))
+  }
+}
+
+function clearSelection() {
+  selectedIds.value = new Set()
+}
+
+async function bulkDelete() {
+  const ids = [...selectedIds.value]
+  if (!confirm(`Delete ${ids.length} file(s)?`)) return
+  try {
+    await filesApi.bulkDelete(ids)
+    files.value = files.value.filter(f => !ids.includes(f.id))
+    selectedIds.value = new Set()
+    auth.fetchUser()
+  } catch (err) {
+    console.error('Bulk delete error:', err)
+    alert('Failed to delete files')
   }
 }
 

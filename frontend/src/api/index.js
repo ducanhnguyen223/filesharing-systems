@@ -25,6 +25,8 @@ export const authApi = {
     register: (email, password) => api.post('/auth/register', { email, password }),
     login: (email, password) => api.post('/auth/login', { email, password }),
     me: () => api.get('/auth/me'),
+    updateMe: (data) => api.patch('/auth/me', data),
+    deleteMe: () => api.delete('/auth/me'),
 }
 
 export const filesApi = {
@@ -34,6 +36,7 @@ export const filesApi = {
         onUploadProgress: onProgress,
     }),
     delete: (id) => api.delete(`/files/${id}`),
+    bulkDelete: (fileIds) => api.post('/files/bulk-delete', { file_ids: fileIds }),
     download: (id) => api.get(`/files/${id}/download`),
 }
 
