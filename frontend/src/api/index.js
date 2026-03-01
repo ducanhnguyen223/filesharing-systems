@@ -34,10 +34,12 @@ export const filesApi = {
         onUploadProgress: onProgress,
     }),
     delete: (id) => api.delete(`/files/${id}`),
+    download: (id) => api.get(`/files/${id}/download`, { responseType: 'blob' }),
 }
 
 export const sharesApi = {
     create: (fileId) => api.post('/shares/', { file_id: fileId }),
+    get: (token) => api.get(`/shares/${token}`),
 }
 
 export default api

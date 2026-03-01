@@ -1,45 +1,51 @@
 <template>
   <div class="auth-page">
-    <div class="auth-container glass-card animate-slide-up">
-      <div class="auth-header">
-        <div class="logo">
-          <span class="logo-icon icon-tactile">☁️</span>
-          <span class="logo-text">FileSharing</span>
-        </div>
-        <h1>Create account</h1>
-        <p class="auth-subtitle">Start your journey with 5GB free</p>
+    <div class="auth-left">
+      <div class="auth-brand">
+        <div class="brand-icon"><span class="mi">cloud</span></div>
+        <span class="brand-name">DocuVault</span>
       </div>
-
-      <form @submit.prevent="submit" class="auth-form">
-        <div class="form-group">
-          <input id="email" v-model="email" type="email" placeholder="Email address" required autocomplete="email" />
-        </div>
-
-        <div class="form-group">
-          <input id="password" v-model="password" type="password" placeholder="Password" required minlength="6" autocomplete="new-password" />
-        </div>
-
-        <div class="form-group">
-          <input id="confirm" v-model="confirmPassword" type="password" placeholder="Confirm password" required autocomplete="new-password" />
-        </div>
-
-        <p v-if="error" class="error-message">{{ error }}</p>
-
-        <button type="submit" class="btn btn-primary btn-full" :disabled="loading">
-          <span v-if="loading" class="spinner-sm"></span>
-          <span v-else>Create Account</span>
-        </button>
-      </form>
-
-      <div class="auth-footer">
-        <p>Already have an account? <RouterLink to="/login" class="link">Sign in</RouterLink></p>
+      <h1>Start with<br/>5 GB free.</h1>
+      <p class="tagline">Create an account and get instant access to secure cloud storage.</p>
+      <div class="features">
+        <div class="feat"><span class="mi">inventory_2</span> 5 GB free storage</div>
+        <div class="feat"><span class="mi">link</span> Instant file sharing</div>
+        <div class="feat"><span class="mi">lock</span> Secure & encrypted</div>
       </div>
-
-      <!-- Feature Bento (Simplified) -->
-      <div class="features-grid">
-        <div class="feature-item"><span>📦</span> 5GB Free</div>
-        <div class="feature-item"><span>🔗</span> Easy Share</div>
-        <div class="feature-item"><span>🔒</span> Encrypted</div>
+    </div>
+    <div class="auth-right">
+      <div class="form-card">
+        <h2>Create account</h2>
+        <p class="subtitle">Get started — it's free and takes a minute</p>
+        <form @submit.prevent="submit" class="form">
+          <div class="field">
+            <label for="email">Email</label>
+            <div class="input-wrap">
+              <span class="mi input-icon">mail</span>
+              <input id="email" v-model="email" type="email" placeholder="you@example.com" required autocomplete="email" />
+            </div>
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <div class="input-wrap">
+              <span class="mi input-icon">lock</span>
+              <input id="password" v-model="password" type="password" placeholder="At least 6 characters" required minlength="6" autocomplete="new-password" />
+            </div>
+          </div>
+          <div class="field">
+            <label for="confirm">Confirm password</label>
+            <div class="input-wrap">
+              <span class="mi input-icon">lock</span>
+              <input id="confirm" v-model="confirmPassword" type="password" placeholder="Re-enter your password" required autocomplete="new-password" />
+            </div>
+          </div>
+          <p v-if="error" class="error">{{ error }}</p>
+          <button type="submit" class="btn-submit" :disabled="loading">
+            <span v-if="loading" class="spinner"></span>
+            <span v-else>Create Account</span>
+          </button>
+        </form>
+        <p class="footer-text">Already have an account? <RouterLink to="/login" class="link">Sign in</RouterLink></p>
       </div>
     </div>
   </div>
@@ -59,17 +65,14 @@ const auth = useAuthStore()
 const router = useRouter()
 
 async function submit() {
-  if (password.value !== confirmPassword.value) {
-    error.value = 'Passwords do not match'
-    return
-  }
+  if (password.value !== confirmPassword.value) { error.value = 'Passwords do not match'; return }
   loading.value = true
   error.value = ''
   try {
     await auth.register(email.value, password.value)
     router.push('/')
   } catch (e) {
-    error.value = 'Registration failed. Try again later.'
+    error.value = e.response?.data?.detail || 'Registration failed. Please try again.'
   } finally {
     loading.value = false
   }
@@ -77,130 +80,39 @@ async function submit() {
 </script>
 
 <style scoped>
-.auth-page {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 24px;
-  background: var(--bg-base);
+.auth-page { display: flex; min-height: 100vh; }
+.auth-left {
+  flex: 1; background: linear-gradient(135deg, #6c47ff 0%, #a855f7 100%);
+  padding: 64px; display: flex; flex-direction: column; justify-content: center; color: #fff; position: relative; overflow: hidden;
 }
+.auth-left::before { content: ''; position: absolute; width: 400px; height: 400px; border-radius: 50%; background: rgba(255,255,255,0.06); top: -100px; right: -100px; }
+.auth-left::after { content: ''; position: absolute; width: 250px; height: 250px; border-radius: 50%; background: rgba(255,255,255,0.06); bottom: -50px; left: -50px; }
+.auth-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 48px; position: relative; z-index: 1; }
+.brand-icon { width: 36px; height: 36px; border-radius: 10px; background: rgba(255,255,255,0.2); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; color: #fff; }
+.brand-name { font-size: 1.2rem; font-weight: 700; }
+.auth-left h1 { font-size: 2.5rem; font-weight: 800; line-height: 1.2; margin-bottom: 16px; letter-spacing: -0.02em; position: relative; z-index: 1; }
+.tagline { font-size: 1.1rem; opacity: 0.85; margin-bottom: 48px; line-height: 1.6; position: relative; z-index: 1; }
+.features { display: flex; flex-direction: column; gap: 14px; position: relative; z-index: 1; }
+.feat { display: flex; align-items: center; gap: 12px; font-size: 0.95rem; opacity: 0.8; }
 
-.auth-container {
-  width: 100%;
-  max-width: 440px;
-  padding: 48px;
-  display: flex;
-  flex-direction: column;
-}
-
-.auth-header {
-  text-align: center;
-  margin-bottom: 32px;
-}
-
-.logo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 24px;
-}
-
-.logo-icon {
-  font-size: 2.2rem;
-}
-
-.logo-text {
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: var(--text-primary);
-  letter-spacing: -0.03em;
-}
-
-h1 {
-  font-size: 1.8rem;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-
-.auth-subtitle {
-  color: var(--text-secondary);
-  font-size: 0.95rem;
-}
-
-.auth-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.form-group label {
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--text-secondary);
-}
-
-.btn-full {
-  width: 100%;
-  padding: 14px;
-  margin-top: 8px;
-}
-
-.auth-footer {
-  text-align: center;
-  margin-top: 24px;
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-}
-
-.link {
-  color: var(--primary-400);
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.link:hover {
-  text-decoration: underline;
-}
-
-.features-grid {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  margin-top: 32px;
-  padding-top: 24px;
-  border-top: 1px solid var(--border-default);
-}
-
-.feature-item {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.error-message {
-  color: var(--danger);
-  font-size: 0.85rem;
-  text-align: center;
-}
-
-.spinner-sm {
-  width: 18px;
-  height: 18px;
-  border: 2px solid rgba(255,255,255,0.2);
-  border-top-color: white;
-  border-radius: 50%;
-  animation: spin 0.6s linear infinite;
-}
-
+.auth-right { flex: 1; background: #f5f5f7; display: flex; align-items: center; justify-content: center; padding: 48px; }
+.form-card { width: 100%; max-width: 400px; background: #fff; padding: 48px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.04); }
+h2 { font-size: 1.6rem; font-weight: 700; margin-bottom: 6px; color: #1a1a2e; }
+.subtitle { color: #9ca3af; font-size: 0.9rem; margin-bottom: 32px; }
+.form { display: flex; flex-direction: column; gap: 18px; }
+.field label { display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 6px; color: #374151; }
+.input-wrap { position: relative; }
+.input-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 18px; }
+.input-wrap input { width: 100%; padding: 11px 14px 11px 40px; border: 1px solid #e8e8ee; border-radius: 10px; font-size: 0.92rem; outline: none; transition: all 0.2s; background: #f9fafb; color: #1a1a2e; }
+.input-wrap input:focus { border-color: #6c47ff; box-shadow: 0 0 0 3px rgba(108,71,255,0.1); background: #fff; }
+.error { color: #ef4444; font-size: 0.82rem; text-align: center; padding: 8px; background: #fef2f2; border-radius: 8px; }
+.btn-submit { width: 100%; padding: 13px; background: #6c47ff; color: #fff; border: none; border-radius: 10px; font-size: 0.95rem; font-weight: 600; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s; }
+.btn-submit:hover { background: #5835db; }
+.btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+.footer-text { text-align: center; margin-top: 24px; font-size: 0.85rem; color: #9ca3af; }
+.link { color: #6c47ff; font-weight: 600; text-decoration: none; }
+.link:hover { text-decoration: underline; }
+.spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
+@media (max-width: 768px) { .auth-page { flex-direction: column; } .auth-left { padding: 32px; min-height: 200px; } .auth-left h1 { font-size: 1.8rem; } .features { display: none; } .auth-right { padding: 24px; } .form-card { padding: 32px; } }
 </style>

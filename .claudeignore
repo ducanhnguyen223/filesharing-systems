@@ -1,8 +1,26 @@
 # Not needed by Claude Code
+
+# Skills & docs
 skills/
 docs/plans/
+
+# AI agent files (other agents)
+AGENTS.md
+GEMINI.md
+SITE.md
+DESIGN.md
+
+# Frontend build artifacts
 frontend/node_modules/
 frontend/dist/
+frontend/.vite/
+
+# Backend artifacts
 backend/.venv/
 backend/test.db
 backend/**/__pycache__/
+backend/**/*.pyc
+backend/.pytest_cache/
+
+# Misc
+.github/
