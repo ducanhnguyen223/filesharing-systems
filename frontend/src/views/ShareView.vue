@@ -60,11 +60,7 @@ async function handleDownload() {
   try {
     const fileId = fileData.value.file_id || fileData.value.id
     const res = await filesApi.download(fileId)
-    const url = window.URL.createObjectURL(new Blob([res.data]))
-    const a = document.createElement('a')
-    a.href = url; a.download = fileData.value.filename
-    document.body.appendChild(a); a.click(); document.body.removeChild(a)
-    window.URL.revokeObjectURL(url)
+    window.open(res.data.url, '_blank')
   } catch (err) {
     console.error('Download error:', err)
     alert('Failed to download')

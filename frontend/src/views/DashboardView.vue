@@ -274,14 +274,7 @@ async function deleteFile(id) {
 async function downloadFile(id, filename) {
   try {
     const res = await filesApi.download(id)
-    const url = window.URL.createObjectURL(new Blob([res.data]))
-    const a = document.createElement('a')
-    a.href = url
-    a.download = filename
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    window.URL.revokeObjectURL(url)
+    window.open(res.data.url, '_blank')
   } catch (err) {
     console.error('Download error:', err)
     alert('Failed to download')

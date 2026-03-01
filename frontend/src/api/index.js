@@ -34,7 +34,7 @@ export const filesApi = {
         onUploadProgress: onProgress,
     }),
     delete: (id) => api.delete(`/files/${id}`),
-    download: (id) => api.get(`/files/${id}/download`, { responseType: 'blob' }),
+    download: (id) => api.get(`/files/${id}/download`),
 }
 
 export const sharesApi = {

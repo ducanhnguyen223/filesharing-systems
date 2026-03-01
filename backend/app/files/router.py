@@ -40,7 +40,7 @@ def download(
     storage: StorageClient = Depends(get_storage_dep),
 ):
     url = service.get_download_url(user, file_id, db, storage)
-    return RedirectResponse(url=url)
+    return {"url": url}
 
 
 @router.delete("/{file_id}", status_code=204)
